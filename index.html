@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAYON CELL BD - Telecom Services</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-yellow: #ffc107;
+            --dark-yellow: #e0a800;
+            --light-bg: #fffdf5;
+            --dark-text: #1a1a1a;
+        }
+        body { background-color: var(--light-bg); font-family: 'Segoe UI', sans-serif; color: var(--dark-text); }
+        .navbar { background: #ffffff; border-bottom: 3px solid var(--primary-yellow); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .navbar-brand { font-weight: 800; color: #000; font-size: 1.6rem; }
+        .hero-section {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffecb5 100%);
+            border-radius: 20px;
+            padding: 35px 20px;
+            margin-top: 20px;
+            border: 1px solid #ffe69c;
+        }
+        .notice-bar { background: #fff; border-left: 5px solid var(--primary-yellow); padding: 12px 20px; border-radius: 12px; font-weight: 600; }
+        .offer-card {
+            background: #ffffff;
+            border: 2px solid #fff3cd;
+            border-radius: 18px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .offer-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--primary-yellow);
+            box-shadow: 0 12px 25px rgba(255, 193, 7, 0.25);
+        }
+        .badge-op { position: absolute; top: 15px; right: 15px; font-size: 0.8rem; padding: 6px 14px; border-radius: 50px; font-weight: bold; }
+        .price-tag { font-size: 1.8rem; font-weight: 800; color: #000; }
+        .btn-warning-custom {
+            background: linear-gradient(45deg, var(--primary-yellow), var(--dark-yellow));
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .btn-filter { border-radius: 30px; font-weight: 600; padding: 8px 22px; border: 2px solid var(--primary-yellow); background: #fff; }
+        .btn-filter.active, .btn-filter:hover { background: var(--primary-yellow); color: #000; }
+
+        #maintenance-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(255,253,245,.98);
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 25px;
+        }
+        #maintenance-screen .maintenance-box {
+            width: 100%;
+            max-width: 620px;
+            background: #fff;
+            border: 2px solid var(--primary-yellow);
+            border-radius: 24px;
+            padding: 45px 25px;
+            box-shadow: 0 18px 55px rgba(0,0,0,.12);
+        }
+        #maintenance-screen .maintenance-icon {
+            width: 82px; height: 82px; margin: 0 auto 20px;
+            border-radius: 50%; background: #fff3cd;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="maintenance-screen">
+        <div class="maintenance-box">
+            <div class="maintenance-icon">🔧</div>
+            <h1 class="fw-bold">ওয়েবসাইট সাময়িকভাবে বন্ধ</h1>
+            <p id="maintenance-message" class="text-muted fs-5 mt-3 mb-0">দুঃখিত! আমাদের সার্ভিস সাময়িকভাবে বন্ধ আছে। কিছুক্ষন পর আবার চেষ্টা করুন।</p>
+            <div class="text-secondary fw-semibold mt-4">কিছুক্ষণ পর আবার চেষ্টা করুন</div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#" id="view-site-name"><i class="fa-solid fa-bolt text-warning me-2"></i>SAYON CELL BD</a>
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold" id="view-support-text"><i class="fa-solid fa-headset me-1"></i> ২৪/৭ সাপোর্ট</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="notice-bar my-4 d-flex align-items-center shadow-sm">
+            <i class="fa-solid fa-bullhorn text-warning fs-4 me-3"></i>
+            <span id="view-notice-text">আজকের অফার দেখতে নিচে স্ক্রোল করুন!</span>
+        </div>
+
+        <div class="hero-section text-center mb-4">
+            <h1 class="fw-bold mb-2" id="view-hero-title">সেরা অফার বেছে নিন ⚡</h1>
+            <p class="text-muted mb-0" id="view-hero-sub">অফার নির্বাচন করুন এবং অর্ডার সম্পন্ন করুন</p>
+        </div>
+
+        <div class="d-flex justify-content-center gap-2 mb-4 flex-wrap" id="filter-buttons">
+            <button class="btn btn-filter active" onclick="filterData('Robi', event)">Robi</button>
+            <button class="btn btn-filter" onclick="filterData('Airtel', event)">Airtel</button>
+            <button class="btn btn-filter" onclick="filterData('Banglalink', event)">Banglalink</button>
+            <button class="btn btn-filter" onclick="filterData('GP', event)">Grameenphone</button>
+        </div>
+
+        <div class="row g-4 mb-5" id="offers-grid"></div>
+    </div>
+
+    <!-- অর্ডার মোডাল (পপআপ) -->
+    <div class="modal fade" id="orderModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px; border: 2px solid var(--primary-yellow);">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-cart-shopping me-2"></i>অর্ডার তথ্য নিশ্চিত করুন</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="p-3 mb-3 rounded bg-light border border-warning">
+                        <small class="text-muted d-block">নির্বাচিত অফার:</small>
+                        <h5 id="modal-offer-title" class="fw-bold text-dark mb-1"></h5>
+                        <div id="modal-offer-price" class="text-danger fw-bold fs-5"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">আপনার নাম:</label>
+                        <input type="text" id="customer-name" class="form-control form-control-lg border-warning" placeholder="আপনার নাম লিখুন">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">যে নম্বরে অফারটি নিবেন (১১ ডিজিট):</label>
+                        <input type="tel" id="customer-phone" class="form-control form-control-lg border-warning" placeholder="018XXXXXXXX">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-warning-custom w-100 fs-5 d-flex align-items-center justify-content-center gap-2" onclick="sendOrderToWhatsApp()">
+                        <span id="btn-text-display">অর্ডার নিশ্চিত করুন</span>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let activeOffer = null;
+        let currentOperator = 'Robi'; // ডিফল্ট অপারেটর
+
+        function checkWebsiteStatus() {
+            const status = localStorage.getItem('cfg_site_status') || 'open';
+            const message = localStorage.getItem('cfg_site_close_msg') || 'দুঃখিত! আমাদের সার্ভিস সাময়িকভাবে বন্ধ আছে। কিছুক্ষন পর আবার চেষ্টা করুন।';
+            const screen = document.getElementById('maintenance-screen');
+            const msg = document.getElementById('maintenance-message');
+
+            if (status === 'closed') {
+                msg.innerText = message;
+                screen.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                return false;
+            } else {
+                screen.style.display = 'none';
+                document.body.style.overflow = '';
+                return true;
+            }
+        }
+
+        function loadSiteData() {
+            if(!checkWebsiteStatus()) return;
+
+            const sName = localStorage.getItem('cfg_site_name') || "SAYON CELL BD";
+            const sSupport = localStorage.getItem('cfg_support_text') || "২৪/৭ সাপোর্ট";
+            const sHeroTitle = localStorage.getItem('cfg_hero_title') || "সেরা অফার বেছে নিন ⚡";
+            const sHeroSub = localStorage.getItem('cfg_hero_sub') || "অফার নির্বাচন করুন এবং অর্ডার সম্পন্ন করুন";
+            const sNotice = localStorage.getItem('cfg_notice_text') || "আজকের অফার দেখতে নিচে স্ক্রোল করুন!";
+            const btnText = localStorage.getItem('cfg_btn_text') || "অর্ডার নিশ্চিত করুন";
+
+            document.getElementById('view-site-name').innerHTML = `<i class="fa-solid fa-bolt text-warning me-2"></i>${sName}`;
+            document.getElementById('view-support-text').innerHTML = `<i class="fa-solid fa-headset me-1"></i>${sSupport}`;
+            document.getElementById('view-hero-title').innerText = sHeroTitle;
+            document.getElementById('view-hero-sub').innerText = sHeroSub;
+            document.getElementById('view-notice-text').innerText = sNotice;
+            document.getElementById('btn-text-display').innerText = btnText;
+
+            // প্রথমে রবি (Robi) অপারেটরের অফারগুলো ফিল্টার করে দেখাবে
+            filterData('Robi', null);
+        }
+
+        function getStoredOffers() {
+            return JSON.parse(localStorage.getItem('myOffers')) || [];
+        }
+
+        function renderGrid(data) {
+            const grid = document.getElementById('offers-grid');
+            grid.innerHTML = '';
+
+            if(data.length === 0) {
+                grid.innerHTML = `<div class="col-12 text-center py-5"><h4 class="text-muted">এই অপারেটরের বর্তমানে কোনো অফার নেই!</h4></div>`;
+                return;
+            }
+
+            data.forEach(item => {
+                grid.innerHTML += `
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card offer-card p-4">
+                            <span class="badge badge-op ${item.badgeBg}">${item.op}</span>
+                            <small class="text-muted fw-bold d-block mb-1"><i class="fa-regular fa-clock me-1"></i>মেয়াদ: ${item.validity}</small>
+                            <h4 class="fw-bold my-2">${item.title}</h4>
+                            <div class="price-tag mb-3">৳ ${item.price}</div>
+                            <button class="btn btn-warning-custom w-100" onclick="openOrderModal('${item.op}', '${item.title}', '${item.price}')">
+                                <i class="fa-solid fa-cart-shopping me-2"></i>অর্ডার করুন
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterData(op, event) {
+            currentOperator = op;
+            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+            if(event) {
+                event.target.classList.add('active');
+            } else {
+                // পেজ লোড হওয়ার সময় রবি (Robi) বাটনটি একটিভ রাখার জন্য
+                const buttons = document.querySelectorAll('.btn-filter');
+                buttons.forEach(btn => {
+                    if(btn.innerText.trim() === op) btn.classList.add('active');
+                });
+            }
+
+            const offers = getStoredOffers();
+            renderGrid(offers.filter(x => x.op === op));
+        }
+
+        function openOrderModal(op, title, price) {
+            activeOffer = { op, title, price };
+            document.getElementById('modal-offer-title').innerText = `${op} - ${title}`;
+            document.getElementById('modal-offer-price').innerText = `মূল্য: ৳${price}`;
+            document.getElementById('customer-name').value = '';
+            document.getElementById('customer-phone').value = '';
+            new bootstrap.Modal(document.getElementById('orderModal')).show();
+        }
+
+        function sendOrderToWhatsApp() {
+            const name = document.getElementById('customer-name').value.trim();
+            const phone = document.getElementById('customer-phone').value.trim();
+
+            if(!name) {
+                alert('অনুগ্রহ করে আপনার নাম লিখুন!');
+                return;
+            }
+
+            if(!phone || phone.length < 11) {
+                alert('অনুগ্রহ করে সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন!');
+                return;
+            }
+
+            const waNum = localStorage.getItem('cfg_wa_num') || "8801872900153";
+            let msgTemplate = localStorage.getItem('cfg_wa_msg_template') || `السلام عليكم!\nআমি ওয়েবসাইট থেকে অফার অর্ডার করতে চাই:\n\n👤 *গ্রাহকের নাম:* {name}\n📱 *অপারেটর:* {operator}\n📦 *অফার:* {offer}\n💵 *মূল্য:* ৳{price}\n📲 *রিচার্জের নম্বর:* {phone}`;
+
+            let finalMsg = msgTemplate
+                .replace(/{name}/g, name)
+                .replace(/{operator}/g, activeOffer.op)
+                .replace(/{offer}/g, activeOffer.title)
+                .replace(/{price}/g, activeOffer.price)
+                .replace(/{phone}/g, phone);
+
+            window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(finalMsg)}`, '_blank');
+        }
+
+        window.onload = function() {
+            loadSiteData();
+        };
+    </script>
+</body>
+</html>
+
+ 
