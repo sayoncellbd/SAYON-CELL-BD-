@@ -83,7 +83,7 @@
         <div class="maintenance-box">
             <div class="maintenance-icon">🔧</div>
             <h1 class="fw-bold">ওয়েবসাইট সাময়িকভাবে বন্ধ</h1>
-            <p id="maintenance-message" class="text-muted fs-5 mt-3 mb-0">দুঃখিত! সার্ভিস সাময়িকভাবে বন্ধ আছে।</p>
+            <p id="maintenance-message" class="text-muted fs-5 mt-3 mb-0">দুঃখিত! আমাদের সার্ভিস সাময়িকভাবে বন্ধ আছে। কিছুক্ষন পর আবার চেষ্টা করুন।</p>
             <div class="text-secondary fw-semibold mt-4">কিছুক্ষণ পর আবার চেষ্টা করুন</div>
         </div>
     </div>
@@ -176,12 +176,13 @@
       let allOffers = [];
       let siteConfig = {};
 
+      // Sync Configurations
       onValue(ref(db, 'config'), (snapshot) => {
           const data = snapshot.val() || {};
           siteConfig = data;
 
           const status = data.site_status || 'open';
-          const message = data.site_close_msg || 'দুঃখিত! সার্ভিস সাময়িকভাবে বন্ধ আছে।';
+          const message = data.site_close_msg || 'দুঃখিত! আমাদের সার্ভিস সাময়িকভাবে বন্ধ আছে।';
           const screen = document.getElementById('maintenance-screen');
 
           if (status === 'closed') {
@@ -200,10 +201,9 @@
           document.getElementById('view-hero-sub').innerText = data.hero_sub || "অফার নির্বাচন করুন এবং অর্ডার সম্পন্ন করুন";
           document.getElementById('view-notice-text').innerText = data.notice_text || "আজকের অফার দেখতে নিচে স্ক্রোল করুন!";
           document.getElementById('btn-text-display').innerText = data.btn_text || "অর্ডার নিশ্চিত করুন";
-
-          filterData(currentOperator, null);
       });
 
+      // Sync Realtime Offers
       onValue(ref(db, 'offers'), (snapshot) => {
           const data = snapshot.val();
           allOffers = [];
@@ -225,15 +225,6 @@
               buttons.forEach(btn => {
                   if(btn.innerText.trim() === op) btn.classList.add('active');
               });
-          }
-
-          // চেক করা হচ্ছে অপারেটর স্ট্যাটাস অ্যাক্টিভ কি না
-          const isOpActive = (siteConfig[`op_${op}`] !== 'inactive');
-
-          if(!isOpActive) {
-              const grid = document.getElementById('offers-grid');
-              grid.innerHTML = `<div class="col-12 text-center py-5"><h4 class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation me-2"></i>বর্তমানে ${op} অপারেটরের সার্ভিস সাময়িকভাবে বন্ধ আছে!</h4></div>`;
-              return;
           }
 
           const filtered = allOffers.filter(x => x.op === op);
@@ -296,4 +287,5 @@
       };
     </script>
 </body>
-</html>
+    </html>
+    
