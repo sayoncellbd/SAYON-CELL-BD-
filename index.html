@@ -27,14 +27,6 @@
             font-size: 1.3rem; 
         }
 
-        .hero-section {
-            background: #fff8e1;
-            border-radius: 20px;
-            padding: 30px 20px;
-            margin-top: 20px;
-            border: 1px solid #ffe082;
-        }
-        
         .notice-bar { 
             background: #fff; 
             border-left: 5px solid var(--primary-yellow); 
@@ -138,11 +130,6 @@
             <span id="view-notice-text" class="fw-bold fs-5">আজকের অফার দেখতে নিচে স্ক্রোল করুন!</span>
         </div>
 
-        <div class="hero-section text-center mb-4">
-            <h1 class="fw-bold mb-2 fs-2" id="view-hero-title">সেরা অফার বেছে নিন ⚡</h1>
-            <p class="text-muted mb-0 fw-semibold fs-6" id="view-hero-sub">অফার নির্বাচন করুন এবং অর্ডার সম্পন্ন করুন</p>
-        </div>
-
         <div class="d-flex justify-content-center gap-2 mb-4 flex-wrap" id="filter-buttons">
             <button class="btn btn-filter active" onclick="filterData('Robi', event)">Robi</button>
             <button class="btn btn-filter" onclick="filterData('Airtel', event)">Airtel</button>
@@ -234,8 +221,6 @@
 
           document.getElementById('view-site-name').innerHTML = `<i class="fa-solid fa-bolt text-warning me-2 fs-4"></i>${data.site_name || "SAYON CELL BD"}`;
           document.getElementById('view-support-text').innerHTML = `<i class="fa-solid fa-headset"></i> ${data.support_text || "২৪/৭ সাপোর্ট"}`;
-          document.getElementById('view-hero-title').innerText = data.hero_title || "সেরা অফার বেছে নিন ⚡";
-          document.getElementById('view-hero-sub').innerText = data.hero_sub || "অফার নির্বাচন করুন এবং অর্ডার সম্পন্ন করুন";
           document.getElementById('view-notice-text').innerText = data.notice_text || "আজকের অফার দেখতে নিচে স্ক্রোল করুন!";
           document.getElementById('btn-text-display').innerText = data.btn_text || "অর্ডার নিশ্চিত করুন";
       });
