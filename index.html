@@ -116,7 +116,7 @@
         <div class="row g-4 mb-5" id="offers-grid"></div>
     </div>
 
-    <!-- অর্ডার মোডাল (পপআপ) -->
+    <!-- অর্ডার মোডাল -->
     <div class="modal fade" id="orderModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 20px; border: 2px solid var(--primary-yellow);">
@@ -152,137 +152,139 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        let activeOffer = null;
-        let currentOperator = 'Robi'; // ডিফল্ট অপারেটর
 
-        function checkWebsiteStatus() {
-            const status = localStorage.getItem('cfg_site_status') || 'open';
-            const message = localStorage.getItem('cfg_site_close_msg') || 'দুঃখিত! আমাদের সার্ভিস সাময়িকভাবে বন্ধ আছে। কিছুক্ষন পর আবার চেষ্টা করুন।';
-            const screen = document.getElementById('maintenance-screen');
-            const msg = document.getElementById('maintenance-message');
+    <!-- Firebase Modular SDK -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-            if (status === 'closed') {
-                msg.innerText = message;
-                screen.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-                return false;
-            } else {
-                screen.style.display = 'none';
-                document.body.style.overflow = '';
-                return true;
-            }
-        }
+      const firebaseConfig = {
+        apiKey: "AIzaSyAMQUxUqwLQaR6aAxCvwOHGH_n0ZuUZp4s",
+        authDomain: "sayon-cell-bd.firebaseapp.com",
+        databaseURL: "https://sayon-cell-bd-default-rtdb.firebaseio.com",
+        projectId: "sayon-cell-bd",
+        storageBucket: "sayon-cell-bd.firebasestorage.app",
+        messagingSenderId: "986946019076",
+        appId: "1:986946019076:web:ac1989df1fa51da61d3a51"
+      };
 
-        function loadSiteData() {
-            if(!checkWebsiteStatus()) return;
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
 
-            const sName = localStorage.getItem('cfg_site_name') || "SAYON CELL BD";
-            const sSupport = localStorage.getItem('cfg_support_text') || "২৪/৭ সাপোর্ট";
-            const sHeroTitle = localStorage.getItem('cfg_hero_title') || "সেরা অফার বেছে নিন ⚡";
-            const sHeroSub = localStorage.getItem('cfg_hero_sub') || "অফার নির্বাচন করুন এবং অর্ডার সম্পন্ন করুন";
-            const sNotice = localStorage.getItem('cfg_notice_text') || "আজকের অফার দেখতে নিচে স্ক্রোল করুন!";
-            const btnText = localStorage.getItem('cfg_btn_text') || "অর্ডার নিশ্চিত করুন";
+      let activeOffer = null;
+      let currentOperator = 'Robi';
+      let allOffers = [];
+      let siteConfig = {};
 
-            document.getElementById('view-site-name').innerHTML = `<i class="fa-solid fa-bolt text-warning me-2"></i>${sName}`;
-            document.getElementById('view-support-text').innerHTML = `<i class="fa-solid fa-headset me-1"></i>${sSupport}`;
-            document.getElementById('view-hero-title').innerText = sHeroTitle;
-            document.getElementById('view-hero-sub').innerText = sHeroSub;
-            document.getElementById('view-notice-text').innerText = sNotice;
-            document.getElementById('btn-text-display').innerText = btnText;
+      // Sync Configurations
+      onValue(ref(db, 'config'), (snapshot) => {
+          const data = snapshot.val() || {};
+          siteConfig = data;
 
-            // প্রথমে রবি (Robi) অপারেটরের অফারগুলো ফিল্টার করে দেখাবে
-            filterData('Robi', null);
-        }
+          const status = data.site_status || 'open';
+          const message = data.site_close_msg || 'দুঃখিত! আমাদের সার্ভিস সাময়িকভাবে বন্ধ আছে।';
+          const screen = document.getElementById('maintenance-screen');
 
-        function getStoredOffers() {
-            return JSON.parse(localStorage.getItem('myOffers')) || [];
-        }
+          if (status === 'closed') {
+              document.getElementById('maintenance-message').innerText = message;
+              screen.style.display = 'flex';
+              document.body.style.overflow = 'hidden';
+              return;
+          } else {
+              screen.style.display = 'none';
+              document.body.style.overflow = '';
+          }
 
-        function renderGrid(data) {
-            const grid = document.getElementById('offers-grid');
-            grid.innerHTML = '';
+          document.getElementById('view-site-name').innerHTML = `<i class="fa-solid fa-bolt text-warning me-2"></i>${data.site_name || "SAYON CELL BD"}`;
+          document.getElementById('view-support-text').innerHTML = `<i class="fa-solid fa-headset me-1"></i>${data.support_text || "২৪/৭ সাপোর্ট"}`;
+          document.getElementById('view-hero-title').innerText = data.hero_title || "সেরা অফার বেছে নিন ⚡";
+          document.getElementById('view-hero-sub').innerText = data.hero_sub || "অফার নির্বাচন করুন এবং অর্ডার সম্পন্ন করুন";
+          document.getElementById('view-notice-text').innerText = data.notice_text || "আজকের অফার দেখতে নিচে স্ক্রোল করুন!";
+          document.getElementById('btn-text-display').innerText = data.btn_text || "অর্ডার নিশ্চিত করুন";
+      });
 
-            if(data.length === 0) {
-                grid.innerHTML = `<div class="col-12 text-center py-5"><h4 class="text-muted">এই অপারেটরের বর্তমানে কোনো অফার নেই!</h4></div>`;
-                return;
-            }
+      // Sync Realtime Offers
+      onValue(ref(db, 'offers'), (snapshot) => {
+          const data = snapshot.val();
+          allOffers = [];
+          if (data) {
+              Object.keys(data).forEach(key => {
+                  allOffers.push(data[key]);
+              });
+          }
+          filterData(currentOperator, null);
+      });
 
-            data.forEach(item => {
-                grid.innerHTML += `
-                    <div class="col-lg-4 col-md-6">
-                        <div class="card offer-card p-4">
-                            <span class="badge badge-op ${item.badgeBg}">${item.op}</span>
-                            <small class="text-muted fw-bold d-block mb-1"><i class="fa-regular fa-clock me-1"></i>মেয়াদ: ${item.validity}</small>
-                            <h4 class="fw-bold my-2">${item.title}</h4>
-                            <div class="price-tag mb-3">৳ ${item.price}</div>
-                            <button class="btn btn-warning-custom w-100" onclick="openOrderModal('${item.op}', '${item.title}', '${item.price}')">
-                                <i class="fa-solid fa-cart-shopping me-2"></i>অর্ডার করুন
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
+      window.filterData = function(op, event) {
+          currentOperator = op;
+          document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+          if(event) {
+              event.target.classList.add('active');
+          } else {
+              const buttons = document.querySelectorAll('.btn-filter');
+              buttons.forEach(btn => {
+                  if(btn.innerText.trim() === op) btn.classList.add('active');
+              });
+          }
 
-        function filterData(op, event) {
-            currentOperator = op;
-            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
-            if(event) {
-                event.target.classList.add('active');
-            } else {
-                // পেজ লোড হওয়ার সময় রবি (Robi) বাটনটি একটিভ রাখার জন্য
-                const buttons = document.querySelectorAll('.btn-filter');
-                buttons.forEach(btn => {
-                    if(btn.innerText.trim() === op) btn.classList.add('active');
-                });
-            }
+          const filtered = allOffers.filter(x => x.op === op);
+          renderGrid(filtered);
+      };
 
-            const offers = getStoredOffers();
-            renderGrid(offers.filter(x => x.op === op));
-        }
+      function renderGrid(data) {
+          const grid = document.getElementById('offers-grid');
+          grid.innerHTML = '';
 
-        function openOrderModal(op, title, price) {
-            activeOffer = { op, title, price };
-            document.getElementById('modal-offer-title').innerText = `${op} - ${title}`;
-            document.getElementById('modal-offer-price').innerText = `মূল্য: ৳${price}`;
-            document.getElementById('customer-name').value = '';
-            document.getElementById('customer-phone').value = '';
-            new bootstrap.Modal(document.getElementById('orderModal')).show();
-        }
+          if(data.length === 0) {
+              grid.innerHTML = `<div class="col-12 text-center py-5"><h4 class="text-muted">এই অপারেটরের বর্তমানে কোনো অফার নেই!</h4></div>`;
+              return;
+          }
 
-        function sendOrderToWhatsApp() {
-            const name = document.getElementById('customer-name').value.trim();
-            const phone = document.getElementById('customer-phone').value.trim();
+          data.forEach(item => {
+              grid.innerHTML += `
+                  <div class="col-lg-4 col-md-6">
+                      <div class="card offer-card p-4">
+                          <span class="badge badge-op ${item.badgeBg}">${item.op}</span>
+                          <small class="text-muted fw-bold d-block mb-1"><i class="fa-regular fa-clock me-1"></i>মেয়াদ: ${item.validity}</small>
+                          <h4 class="fw-bold my-2">${item.title}</h4>
+                          <div class="price-tag mb-3">৳ ${item.price}</div>
+                          <button class="btn btn-warning-custom w-100" onclick="openOrderModal('${item.op}', '${item.title}', '${item.price}')">
+                              <i class="fa-solid fa-cart-shopping me-2"></i>অর্ডার করুন
+                          </button>
+                      </div>
+                  </div>
+              `;
+          });
+      }
 
-            if(!name) {
-                alert('অনুগ্রহ করে আপনার নাম লিখুন!');
-                return;
-            }
+      window.openOrderModal = function(op, title, price) {
+          activeOffer = { op, title, price };
+          document.getElementById('modal-offer-title').innerText = `${op} - ${title}`;
+          document.getElementById('modal-offer-price').innerText = `মূল্য: ৳${price}`;
+          document.getElementById('customer-name').value = '';
+          document.getElementById('customer-phone').value = '';
+          new bootstrap.Modal(document.getElementById('orderModal')).show();
+      };
 
-            if(!phone || phone.length < 11) {
-                alert('অনুগ্রহ করে সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন!');
-                return;
-            }
+      window.sendOrderToWhatsApp = function() {
+          const name = document.getElementById('customer-name').value.trim();
+          const phone = document.getElementById('customer-phone').value.trim();
 
-            const waNum = localStorage.getItem('cfg_wa_num') || "8801872900153";
-            let msgTemplate = localStorage.getItem('cfg_wa_msg_template') || `السلام عليكم!\nআমি ওয়েবসাইট থেকে অফার অর্ডার করতে চাই:\n\n👤 *গ্রাহকের নাম:* {name}\n📱 *অপারেটর:* {operator}\n📦 *অফার:* {offer}\n💵 *মূল্য:* ৳{price}\n📲 *রিচার্জের নম্বর:* {phone}`;
+          if(!name) return alert('অনুগ্রহ করে আপনার নাম লিখুন!');
+          if(!phone || phone.length < 11) return alert('অনুগ্রহ করে সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন!');
 
-            let finalMsg = msgTemplate
-                .replace(/{name}/g, name)
-                .replace(/{operator}/g, activeOffer.op)
-                .replace(/{offer}/g, activeOffer.title)
-                .replace(/{price}/g, activeOffer.price)
-                .replace(/{phone}/g, phone);
+          const waNum = siteConfig.wa_num || "8801872900153";
+          let msgTemplate = siteConfig.wa_msg_template || `السلام عليكم!\nআমি ওয়েবসাইট থেকে অফার অর্ডার করতে চাই:\n\n👤 *গ্রাহকের নাম:* {name}\n📱 *অপারেটর:* {operator}\n📦 *অফার:* {offer}\n💵 *মূল্য:* ৳{price}\n📲 *রিচার্জের নম্বর:* {phone}`;
 
-            window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(finalMsg)}`, '_blank');
-        }
+          let finalMsg = msgTemplate
+              .replace(/{name}/g, name)
+              .replace(/{operator}/g, activeOffer.op)
+              .replace(/{offer}/g, activeOffer.title)
+              .replace(/{price}/g, activeOffer.price)
+              .replace(/{phone}/g, phone);
 
-        window.onload = function() {
-            loadSiteData();
-        };
+          window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(finalMsg)}`, '_blank');
+      };
     </script>
 </body>
 </html>
-
- 
